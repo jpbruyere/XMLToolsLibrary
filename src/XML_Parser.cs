@@ -1379,11 +1379,12 @@ namespace XMLTools
             }
             set { _Name = value; }
         }
-        /// <summary>
-        /// get normalize name for csharp removing prefix and checking for accepted char in name of class
-        /// and properties
-        /// </summary>
-        public string csName
+		public string ResolvedName => _Name is PEReference ? (_Name as PEReference).entityDecl.Name.ToString() : _Name.ToString();
+		/// <summary>
+		/// get normalize name for csharp removing prefix and checking for accepted char in name of class
+		/// and properties
+		/// </summary>
+		public string csName
         {
             get
             {

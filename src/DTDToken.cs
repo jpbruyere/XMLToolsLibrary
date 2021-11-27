@@ -8,32 +8,18 @@ namespace XMLTools
 {
 	public class XMLToken 
 	{
-        public XMLToken()
-        {
-        //    if (this is PEReference)
-        //        return;
-        //    XMLParser.CurrentParser.currentDTDObject = this;
-        }
+        public XMLToken(){}
         public XMLToken(string v)
         { _value = v; }
-
-        //public PEReference PERef = null;
-        //public bool isPEReference
-        //{
-        //    get { return PERef == null ? false : true; }
-        //}
-        private string _value;
+			
+        string _value;
 
         public string value
         {
             get { return _value; }
             set { _value = value; }
         }
-
-        public bool IsParameterEntityReference
-        {
-            get { return this is PEReference ? true : false; }
-        }
+		public string Value => this is PEReference ? (this as PEReference).CompiledValue.ToString() : _value;
         /// <summary>
         /// XMLToken: convert to T and if it's a PEReference, takes the compiled value and convert it
         /// return default(T) is not the token or a compiled value is targeted type
@@ -48,9 +34,10 @@ namespace XMLTools
 				} catch (Exception ex) {
 					return (T)(object)this;
 				}
-			}else if (this is PEReference)
-            {
-                PEReference pe = this as PEReference;
+			}
+
+			PEReference pe = this as PEReference;
+			if (pe != null) {                
 				if (pe.CompiledValue is T){
 					try {
 						return (T)Convert.ChangeType(pe.CompiledValue, typeof(T));
@@ -71,7 +58,9 @@ namespace XMLTools
 					result = (T)(object)this;
 				}
 				return true;
-			}else if (this is PEReference)
+			}
+
+			if (this is PEReference)
 			{
 				PEReference pe = this as PEReference;
 				if (pe.CompiledValue is T){
@@ -103,7 +92,8 @@ namespace XMLTools
 					return ad.isCreatedByCompiler ?
 						EntityDecl.GetElementNameFromPEName (ad.Name) :
 						ad.Name.CompiledName;
-				}else if (this is DTDObject)
+				}
+				if (this is DTDObject)
 					return (this as DTDObject).Name.CompiledName;
 				else if (this is PEReference)
 					return (this as PEReference).entityDecl.ElementName;

@@ -256,7 +256,7 @@ namespace XMLTools
 		{
 			CodeTypeDeclaration cls = null;
 			string clsName = "";
-			if (e.Name.IsParameterEntityReference) {
+			if (e.Name is PEReference) {
 				EntityDecl ed = (e.Name as PEReference).entityDecl;
 				currentNameSpace = getNameSpaceFromEntityDecl (ed);
 				clsName = ed.ElementName;
@@ -335,7 +335,7 @@ namespace XMLTools
 						}));
 			} else {
 				#region create mother class based on entity category
-				if (_particle.IsParameterEntityReference) {
+				if (_particle is PEReference) {
 					EntityDecl ed = (_particle as PEReference).entityDecl;
 					if (ed.Category == EntityDecl.ParameterEntityCategories.Class) {
 						CodeTypeDeclaration ctd = null;
@@ -346,7 +346,7 @@ namespace XMLTools
 							ctd.Comments.Add(new CodeCommentStatement("base class created with Entity name",true));
 							foreach (XMLToken tk in particle.Children) {
 								CodeTypeDeclaration derivedClass = null;
-								if (tk.IsParameterEntityReference) {
+								if (tk is PEReference) {
 									ed = (tk as PEReference).entityDecl;
 									if (!getTypeByName (ed.ElementName,ref derivedClass)) {
 										Debug.WriteLine ("\n\tClass not yet defined\n" + p.Name);
@@ -531,7 +531,7 @@ namespace XMLTools
 			string typeName = "";
 			string enumName = "";
 
-			if (a.attributeTypeDecl.IsParameterEntityReference) {
+			if (a.attributeTypeDecl is PEReference) {
 				typeName = (a.attributeTypeDecl as PEReference).entityDecl.ElementName;
 				enumName = enumPrefix + normalizeForCSHarp (typeName) + enumSufix;
 			} else {
@@ -562,7 +562,7 @@ namespace XMLTools
 				CodeTypeDeclaration ctdEnum = null;
 				if (!(getEnumDeclaration (enumName, ref ctdEnum) || getEnumDeclaration (enumName, ref ctdEnum, cls))) {
 					ctdEnum = createEnumeration (enumName, atde.tokenList);
-					if (a.attributeTypeDecl.IsParameterEntityReference || t.IsParameterEntityReference || iFace != null)
+					if (a.attributeTypeDecl is PEReference || t is PEReference || iFace != null)
 						currentNameSpace.Types.Add (ctdEnum);
 					else
 						cls.Members.Add (ctdEnum);
@@ -814,7 +814,7 @@ namespace XMLTools
 				break;
 			case ParticleTypes.Sequence:
 				foreach (XMLToken t in particle.Children) {
-					if (t.IsParameterEntityReference) {
+					if (t is PEReference) {
 						PEReference peRef = t as PEReference;
 						string name = "unamed";
 						if (peRef.CompiledValue is DTDObject)

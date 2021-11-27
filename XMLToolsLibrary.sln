@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLToolsLibrary", "XMLToolsLibrary.csproj", "{1A038BA7-4A79-4595-AB41-53883933433F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{195B56D6-59BD-472E-B40D-01AB0030F410}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A038BA7-4A79-4595-AB41-53883933433F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A038BA7-4A79-4595-AB41-53883933433F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A038BA7-4A79-4595-AB41-53883933433F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A038BA7-4A79-4595-AB41-53883933433F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{195B56D6-59BD-472E-B40D-01AB0030F410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{195B56D6-59BD-472E-B40D-01AB0030F410}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{195B56D6-59BD-472E-B40D-01AB0030F410}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{195B56D6-59BD-472E-B40D-01AB0030F410}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

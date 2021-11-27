@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.IO;
 using System.Diagnostics;
-using System.CodeDom;
-using System.CodeDom.Compiler;
-using Microsoft.CSharp;
 
 /*
 [28]   	doctypedecl	    ::=   	'<!DOCTYPE' S Name (S ExternalID)? S? ('[' intSubset ']' S?)? '>'	[VC: Root Element Type]
@@ -17,9 +13,8 @@ using Microsoft.CSharp;
 				                                                                                    [WFC: PEs in Internal Subset]
 */
 
-namespace XMLTools
-{
-    public class XMLDocument
+namespace XMLTools {
+	public class XMLDocument
     {
         public List<XMLToken> dtdObjects = new List<XMLToken>();
 
@@ -78,7 +73,7 @@ namespace XMLTools
 
         public override string ToString()
         {
-            XMLParser.ParameterEntityExpansion = false;
+            XMLParser.ParameterEntityExpansion = true;
             
             string tmp = "";
             foreach (EntityDecl ent in dtdObjects.OfType<EntityDecl>())
