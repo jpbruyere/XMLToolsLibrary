@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +10,7 @@ using System.Diagnostics;
 
 /*
 [45]   	elementdecl	    ::=   	'<!ELEMENT' S Name S contentspec S? '>'	[VC: Unique Element Type Declaration]
-[46]   	contentspec	    ::=   	'EMPTY' | 'ANY' | Mixed | children 
+[46]   	contentspec	    ::=   	'EMPTY' | 'ANY' | Mixed | children
 [47]   	children	    ::=   	(choice | seq) ('?' | '*' | '+')?
 [48]   	cp	            ::=   	(Name | choice | seq) ('?' | '*' | '+')?
 [49]   	choice	        ::=   	'(' S? cp ( S? '|' S? cp )+ S? ')'	[VC: Proper Group/PE Nesting]
@@ -29,7 +33,7 @@ namespace XMLTools
     /// </summary>
     public enum ParticleTypes
     {
-        Unknown,        
+        Unknown,
         Choice,
         Sequence,
     }
@@ -114,11 +118,11 @@ namespace XMLTools
                     //skip the parenthesis
                     xp.Read();
                     //the content spec is a particle
-                    //remove fake token from the stack without altering highestLevel in posiitoningStack                                        
+                    //remove fake token from the stack without altering highestLevel in posiitoningStack
                     //create and push the final ParticleObject
                     cs = new Particle();
                     xp.ReplaceTopOfTheStack(cs);
-                    
+
                     xp.skipWhiteSpaces();
 
                     if (xp.TestNextChar('#', false))
@@ -243,7 +247,7 @@ namespace XMLTools
             get { return _Children; }
             set { _Children = value; }
         }
-        
+
         public static void parse(XMLParser reader)
         {
             while (!reader.EndOfStream)
@@ -255,14 +259,14 @@ namespace XMLTools
                 switch (reader.peekChar)
                 {
                     case '(':
-                        reader.Read();                        
+                        reader.Read();
                         reader.DTDObjectStack.Push(new Particle());
                         Particle.parse(reader);
                         break;
                     case ')':
                         reader.Read(); //skip closing ')'
                         if (reader.DTDObjectStack.Count > 2)
-                            (reader.TopButOneOfDTDStack as Particle).addChild(reader.PopDTDObj());                        
+                            (reader.TopButOneOfDTDStack as Particle).addChild(reader.PopDTDObj());
                         (reader.topOfDTDStack as ParticleBase).checkForOccurenceModificator(reader);
                         return;
                     case '|':
@@ -299,7 +303,7 @@ namespace XMLTools
         {
             Particle p = t as Particle;
             if (p != null)
-                p.Parent = this;            
+                p.Parent = this;
 
             Children.Add(t);
         }
@@ -331,7 +335,7 @@ namespace XMLTools
                     else if (isCreatedByCompiler)
                         tmp = " { ";
                     else
-                        tmp = " ( ";                
+                        tmp = " ( ";
 
                 tmp += Children[0].ToString();
 

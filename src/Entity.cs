@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+using System;
 using System.Linq;
 /*
 
@@ -6,10 +10,10 @@ using System.Linq;
 [71]   	GEDecl	        ::=   	'<!ENTITY' S Name S EntityDef S? '>'
 [72]   	PEDecl	        ::=   	'<!ENTITY' S '%' S Name S PEDef S? '>'
 [73]   	EntityDef	    ::=   	EntityValue | (ExternalID NDataDecl?)
-[74]   	PEDef	        ::=   	EntityValue | ExternalID 
+[74]   	PEDef	        ::=   	EntityValue | ExternalID
 [75]   	ExternalID	    ::=   	'SYSTEM' S SystemLiteral
 			                  | 'PUBLIC' S PubidLiteral S SystemLiteral
-[76]   	NDataDecl	    ::=   	S 'NDATA' S Name 
+[76]   	NDataDecl	    ::=   	S 'NDATA' S Name
 */
 
 namespace XMLTools
@@ -34,7 +38,7 @@ namespace XMLTools
         /// </summary>
         public EntityDeclTypes entityDeclType;
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public XMLToken Value;
         public XMLToken CompiledValue;
@@ -50,7 +54,7 @@ namespace XMLTools
             reader.disableParameterEntityExpansion();
             reader.skipWhiteSpaces();
 
-            EntityDecl entity = new EntityDecl();           
+            EntityDecl entity = new EntityDecl();
 
             if (reader.TestNextChar('%'))
             {
@@ -375,7 +379,7 @@ namespace XMLTools
 
         public static implicit operator PEReference(string s)
         { return new PEReference(s); }
-        
+
         public static implicit operator AttlistDecl(PEReference peRef)
         { return peRef == null ? null : peRef.CompiledValue as AttlistDecl; }
 

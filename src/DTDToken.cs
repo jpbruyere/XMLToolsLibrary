@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,12 +10,12 @@ using System.Diagnostics;
 
 namespace XMLTools
 {
-	public class XMLToken 
+	public class XMLToken
 	{
         public XMLToken(){}
         public XMLToken(string v)
         { _value = v; }
-			
+
         string _value;
 
         public string value
@@ -37,7 +41,7 @@ namespace XMLTools
 			}
 
 			PEReference pe = this as PEReference;
-			if (pe != null) {                
+			if (pe != null) {
 				if (pe.CompiledValue is T){
 					try {
 						return (T)Convert.ChangeType(pe.CompiledValue, typeof(T));
@@ -46,7 +50,7 @@ namespace XMLTools
 					}
 				}
             }
-            
+
             return default(T);
         }
 		public bool Extract2<T>(out T result)
@@ -97,7 +101,7 @@ namespace XMLTools
 					return (this as DTDObject).Name.CompiledName;
 				else if (this is PEReference)
 					return (this as PEReference).entityDecl.ElementName;
-				else 
+				else
                     return string.IsNullOrEmpty(value) ? "unamed" : value;
             }
         }

@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +22,7 @@ namespace XMLTools
         }
 
         internal static Comment Parse(XMLParser parser)
-        {                        
+        {
             Comment c = "";
 
             while (!parser.EndOfStream && !c.Content.EndsWith("--"))

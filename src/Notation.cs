@@ -1,6 +1,10 @@
-﻿/*
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+/*
 [82]   	NotationDecl    = '<!NOTATION' S Name S (ExternalID | PublicID) S? '>'
-[83]   	PublicId        = 'PUBLIC' S PubidLiteral 
+[83]   	PublicId        = 'PUBLIC' S PubidLiteral
  */
 namespace XMLTools
 {
@@ -14,7 +18,7 @@ namespace XMLTools
         public static XMLToken parse(XMLParser reader)
         {
             reader.skipWhiteSpaces();
-            
+
             NotationDecl notation = new NotationDecl { Name = reader.nextNameToken };
 
             foreach (DTDObject o in reader.XMLObjects)

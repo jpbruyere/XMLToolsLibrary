@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -27,7 +31,7 @@ namespace XMLTools {
             Stopwatch timer = Stopwatch.StartNew();
 
             load(dtdPath);
-            
+
             timer.Stop();
             Console.WriteLine("Parsing time: ms:{0}  ticks:{1}", timer.ElapsedMilliseconds, timer.ElapsedTicks);
         }
@@ -49,12 +53,12 @@ namespace XMLTools {
                     parser.XMLObjects = dtdObjects;
                     parser.parse();
 
-					//save the first doctype 
+					//save the first doctype
 					if (string.IsNullOrEmpty (rootElement))
 						rootElement = parser.RootNodeName;
                 }
             }
-        
+
         }
 
         public ElementDecl[] Elements
@@ -62,8 +66,8 @@ namespace XMLTools {
             get { return dtdObjects.OfType<ElementDecl>().ToArray(); }
         }
         public EntityDecl[] Entities
-        { 
-            get { return dtdObjects.OfType<EntityDecl>().ToArray(); } 
+        {
+            get { return dtdObjects.OfType<EntityDecl>().ToArray(); }
         }
         public AttlistDecl[] Attributes
         {
@@ -74,7 +78,7 @@ namespace XMLTools {
         public override string ToString()
         {
             XMLParser.ParameterEntityExpansion = true;
-            
+
             string tmp = "";
             foreach (EntityDecl ent in dtdObjects.OfType<EntityDecl>())
             {

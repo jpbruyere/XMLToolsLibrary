@@ -1,23 +1,28 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLToolsLibrary", "XMLToolsLibrary.csproj", "{1A038BA7-4A79-4595-AB41-53883933433F}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLToolsLibrary", "XMLToolsLibrary.csproj", "{0A00A1C0-8CCA-4E9A-8F6F-488C744FA289}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{195B56D6-59BD-472E-B40D-01AB0030F410}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{C78A46E3-9BF1-4CEE-8C0C-1521D7A52FAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1A038BA7-4A79-4595-AB41-53883933433F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A038BA7-4A79-4595-AB41-53883933433F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A038BA7-4A79-4595-AB41-53883933433F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A038BA7-4A79-4595-AB41-53883933433F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{195B56D6-59BD-472E-B40D-01AB0030F410}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{195B56D6-59BD-472E-B40D-01AB0030F410}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{195B56D6-59BD-472E-B40D-01AB0030F410}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{195B56D6-59BD-472E-B40D-01AB0030F410}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A00A1C0-8CCA-4E9A-8F6F-488C744FA289}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A00A1C0-8CCA-4E9A-8F6F-488C744FA289}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A00A1C0-8CCA-4E9A-8F6F-488C744FA289}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A00A1C0-8CCA-4E9A-8F6F-488C744FA289}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C78A46E3-9BF1-4CEE-8C0C-1521D7A52FAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C78A46E3-9BF1-4CEE-8C0C-1521D7A52FAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C78A46E3-9BF1-4CEE-8C0C-1521D7A52FAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C78A46E3-9BF1-4CEE-8C0C-1521D7A52FAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

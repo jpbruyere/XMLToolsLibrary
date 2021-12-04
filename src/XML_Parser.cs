@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,26 +18,26 @@ using System.Diagnostics;
 Extensible Markup Language (XML) 1.0 (Fifth Edition) 26/12/2013
 http://
 [77]   	TextDecl	    ::=   	'<?xml' VersionInfo? EncodingDecl S? '?>'
- 
+
 [22]   	prolog	        ::=   	XMLDecl? Misc* (doctypedecl Misc*)?
 [23]   	XMLDecl	        ::=   	'<?xml' VersionInfo EncodingDecl? SDDecl? S? '?>'
 [24]   	VersionInfo	    ::=   	S 'version' Eq ("'" VersionNum "'" | '"' VersionNum '"')
 [25]   	Eq	            ::=   	S? '=' S?
 [26]   	VersionNum	    ::=   	'1.' [0-9]+
-[27]   	Misc	        ::=   	Comment | PI | S 
- 
+[27]   	Misc	        ::=   	Comment | PI | S
+
 [16]   	PI	            ::=   	'<?' PITarget (S (Char* - (Char* '?>' Char*)))? '?>'
 [17]   	PITarget	    ::=   	Name - (('X' | 'x') ('M' | 'm') ('L' | 'l'))
 [18]   	CDSect	        ::=   	CDStart CData CDEnd
 [19]   	CDStart	        ::=   	'<![CDATA['
 [20]   	CData	        ::=   	(Char* - (Char* ']]>' Char*))
-[21]   	CDEnd	        ::=   	']]>' 
+[21]   	CDEnd	        ::=   	']]>'
 
 [61]   	conditionalSect	::=   	includeSect | ignoreSect
 [62]   	includeSect	    ::=   	'<![' S? 'INCLUDE' S? '[' extSubsetDecl ']]>' 	[VC: Proper Conditional Section/PE Nesting]
 [63]   	ignoreSect	    ::=   	'<![' S? 'IGNORE' S? '[' ignoreSectContents* ']]>'	[VC: Proper Conditional Section/PE Nesting]
 [64]   	ignoreSectContents ::=   	Ignore ('<![' ignoreSectContents ']]>' Ignore)*
-[65]   	Ignore	        ::=   	Char* - (Char* ('<![' | ']]>') Char*)  
+[65]   	Ignore	        ::=   	Char* - (Char* ('<![' | ']]>') Char*)
  */
 
 namespace XMLTools
@@ -50,7 +54,7 @@ namespace XMLTools
             txt = string.Format("XML Parser exception {3} line:{0}, column{1} : {2}", XMLParser.CurrentParser.currentLine, XMLParser.CurrentParser.currentColumn, txt, XMLParser.externalFileProcessed);
         }
     }
-    /* Processing Instruction (PI) 
+    /* Processing Instruction (PI)
  * */
     public class PI
     {
@@ -660,8 +664,8 @@ namespace XMLTools
             {
                 PEReference nextPERef = null;
 
-                //on vérifie que l'on ne compile pas deux entités dans un même token, 
-                // si c'est le cas, on n'affecte aucune valeur compilée pour cette PERef                
+                //on vérifie que l'on ne compile pas deux entités dans un même token,
+                // si c'est le cas, on n'affecte aucune valeur compilée pour cette PERef
                 if (PERefStack.Count > 0)
                     nextPERef = PERefStack.Peek();
 
@@ -678,7 +682,7 @@ namespace XMLTools
                     }
                 }
 
-                //on remplace l'objet compilé dans la pile par la référence (PERef) 
+                //on remplace l'objet compilé dans la pile par la référence (PERef)
                 List<XMLToken> tmpList = DTDObjectStack.ToList();
 
                 int ptr = tmpList.IndexOf(peRef.CompiledValue);
@@ -693,7 +697,7 @@ namespace XMLTools
 
                     if (tmp != null)
                     {
-                        //si c'est une particule et qu'aucun enfant n'est présent, on supprime 
+                        //si c'est une particule et qu'aucun enfant n'est présent, on supprime
                         if (p.Children.Count == 0)
                         {
                             //on affecte la particule suivante à la valeur compilée
@@ -912,7 +916,7 @@ namespace XMLTools
                 //if (rxValidChar.IsMatch(Char.ToString((Char)Peek())))
 
                 //else
-                //    throw new DTDParserException("Invalid character");                
+                //    throw new DTDParserException("Invalid character");
             }
         }
         public override int Read()
@@ -975,7 +979,7 @@ namespace XMLTools
 
 
         /// <summary>
-        /// Fetch next dtd value that could be a PERef 
+        /// Fetch next dtd value that could be a PERef
         /// </summary>
         public XMLToken nextValueToken
         {
@@ -1038,7 +1042,7 @@ namespace XMLTools
             }
         }
         /// <summary>
-        /// fetch valid name         
+        /// fetch valid name
         /// </summary>
         /// <return>string</return>
         public string nextName
@@ -1333,7 +1337,7 @@ namespace XMLTools
         }
         /// <summary>
         /// Open a new DTDReader to parse external file
-        /// passing actual DTDObjects list 
+        /// passing actual DTDObjects list
         /// </summary>
         /// <param name="extID"></param>
         public void LoadSubset(ExternalID extID)

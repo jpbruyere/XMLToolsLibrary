@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Copyright (c) 2013-2021  Jean-Philippe Bruyère <jp_bruyere@hotmail.com>
+//
+// This code is licensed under the MIT license (MIT) (http://opensource.org/licenses/MIT)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 namespace XMLTools
@@ -16,7 +20,7 @@ namespace XMLTools
                     yield return element;
                 }
             }
-        }    
+        }
     }
     public class node
     {
@@ -52,7 +56,7 @@ namespace XMLTools
         public void removeChild(node child)
         {
             Children.Remove(child);
-        }      
+        }
 
         public string getAttributeValue(string attributeName)
         {
@@ -112,7 +116,7 @@ namespace XMLTools
 
                 List<string> names = new List<string>();
                 names.Add(Name);
-                
+
                 foreach (node n in Children)
                 {
                     names.AddRange(n.AllNodeNames);
