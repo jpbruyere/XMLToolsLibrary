@@ -64,9 +64,7 @@ namespace XMLTools
 				return true;
 			}
 
-			if (this is PEReference)
-			{
-				PEReference pe = this as PEReference;
+			if (this is PEReference pe)	{
 				if (pe.CompiledValue is T){
 					try {
 						result = (T)Convert.ChangeType(pe.CompiledValue, typeof(T));

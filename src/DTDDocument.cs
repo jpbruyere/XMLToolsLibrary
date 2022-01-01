@@ -46,7 +46,7 @@ namespace XMLTools {
             if (!string.IsNullOrEmpty(dir))
                 Directory.SetCurrentDirectory(dir);
 
-            using (FileStream fs = new FileStream(dtdPath, System.IO.FileMode.Open))
+            using (FileStream fs = new FileStream(Path.GetFileName(dtdPath), System.IO.FileMode.Open))
             {
                 using (XMLParser parser = new XMLParser(fs))
                 {

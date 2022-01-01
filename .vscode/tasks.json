@@ -2,6 +2,45 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "build svgparsergen",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+				"${workspaceFolder}/samples/svgparsergen/svgparsergen.csproj",
+				"/property:Configuration=Debug",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "build dtddump",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+				"${workspaceFolder}/samples/dtddump/dtddump.csproj",
+				"/property:Configuration=Debug",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
+			"label": "build dtddumpsimple",
+			"command": "dotnet",
+			"type": "process",
+			"args": [
+				"build",
+				"${workspaceFolder}/samples/dtddumpsimple/dtddumpsimple.csproj",
+				"/property:Configuration=Debug",
+				"/property:GenerateFullPaths=true",
+				"/consoleloggerparameters:NoSummary"
+			],
+			"problemMatcher": "$msCompile"
+		},
+		{
 			"label": "build",
 			"command": "dotnet",
 			"type": "process",
@@ -9,7 +48,6 @@
 				"build",
 				"${workspaceFolder}/test/test.csproj",
 				"/property:GenerateFullPaths=true",
-				"/property:Configuration=Debug",
 				"/consoleloggerparameters:NoSummary"
 			],
 			"problemMatcher": "$msCompile"
@@ -35,7 +73,6 @@
 				"run",
 				"${workspaceFolder}/test/test.csproj",
 				"/property:GenerateFullPaths=true",
-				"/property:Configuration=Debug",
 				"/consoleloggerparameters:NoSummary"
 			],
 			"problemMatcher": "$msCompile"

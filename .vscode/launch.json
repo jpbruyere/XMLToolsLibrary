@@ -5,6 +5,39 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": ".NET Core Launch (svgparsergen)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build svgparsergen",
+			"program": "${workspaceFolder}/samples/svgparsergen/bin/Debug/netcoreapp3.1/svgparsergen.dll",
+			"args": [],
+			"cwd": "${workspaceFolder}",
+			"console": "internalConsole",
+			"stopAtEntry": false
+		},
+		{
+			"name": ".NET Core Launch (dtddump)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build dtddump",
+			"program": "${workspaceFolder}/samples/dtddump/bin/Debug/netcoreapp3.1/dtddump.dll",
+			"args": [],
+			"cwd": "${workspaceFolder}",
+			"console": "externalTerminal",
+			"stopAtEntry": false
+		},
+		{
+			"name": ".NET Core Launch (dtddumpsimple)",
+			"type": "coreclr",
+			"request": "launch",
+			"preLaunchTask": "build dtddumpsimple",
+			"program": "${workspaceFolder}/samples/dtddumpsimple/bin/Debug/netcoreapp3.1/dtddumpsimple.dll",
+			"args": [],
+			"cwd": "${workspaceFolder}",
+			"console": "externalTerminal",
+			"stopAtEntry": false
+		},
+		{
 			"name": ".NET Core Launch (console)",
 			"type": "coreclr",
 			"request": "launch",
@@ -12,7 +45,7 @@
 			"program": "${workspaceFolder}/test/bin/Debug/net5.0/test.dll",
 			"args": [],
 			"cwd": "${workspaceFolder}/test",
-			"console": "internalConsole",
+			"console": "externalTerminal",
 			"stopAtEntry": false
 		},
 		{
