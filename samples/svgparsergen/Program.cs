@@ -11,25 +11,21 @@ namespace svgparsergen
 {
 	class Program
 	{
-		class AttributeDefInfo { //: IEquatable<AttributeDefInfo> {
+		class AttributeDefInfo  : IEquatable<AttributeDefInfo> {
 			public string attGroup;
 			public AttributeDef attDef;
 			public string name => attDef.Name.ToString();
-			public string define => attGroup == null ? name.ToUpper().Replace('-','_').Replace(':','_') : $"{attGroup.ToUpper().Replace('.','_').Replace('-','_')}_{name.ToUpper().Replace('-','_').Replace(':','_')}";
+			public string name_normalized => name.ToUpper().Replace('-','_').Replace(':','_');
+			public string attGroup_normalized => attGroup.ToUpper().Replace('.','_').Replace('-','_');
+
+			public string define => attGroup == null ? name_normalized : $"{attGroup_normalized}_{name_normalized}";
 			public AttributeDefInfo (AttributeDef attDef, string attGroup = null) {
 				this.attDef = attDef;
 				this.attGroup = attGroup;
 			}
-			/*public static bool operator ==(AttributeDefInfo left, AttributeDefInfo right) => left is AttributeDefInfo ? left.Equals(right) : false;
-			public static bool operator !=(AttributeDefInfo left, AttributeDefInfo right) => left is AttributeDefInfo ? !left.Equals(right) : false;
 			public bool Equals(AttributeDefInfo other)
-				=> other is AttributeDefInfo ? other.name == this.name : false;
-
-			public override bool Equals(object obj) => obj is AttributeDefInfo adi && adi.Equals (this);
-
-			public override int GetHashCode() => name.GetHashCode();
-
-			public override string ToString() => name;*/
+				=> other is AttributeDefInfo ? other.define == this.define : false;
+			public override int GetHashCode() => define.GetHashCode();
 		}
 		static void processAttributeDef (List<AttributeDefInfo> attributes, AttributeDef adef, string attributeGroup = null) {
 			if (adef == null)
@@ -82,6 +78,128 @@ namespace svgparsergen
 				Console.WriteLine ($"\t\t{cs.contentType}");
 			}
 		}
+		static void process_enum_match (IndentedTextWriter tw, AttributeDefInfo adi, string value) {
+			tw.WriteLine ($"PROCESS_{adi.define}_{value.ToUpper().Replace('-','_')}");
+		}
+		static void process_enums (AttributeDefInfo adi, int level, IndentedTextWriter tw, IEnumerable<IGrouping<char, string>> elts, StringBuilder chain) {
+			const string defaultcase = @"LOG(""Unexpected enum value: %s->%s=%s\n"", svg->att, svg->att, svg->value);";
+			if (elts.Count() > 1) {
+				bool chainTest = false;
+				if (chain.Length > 0) {
+					if (chain.Length == 1)
+						tw.WriteLine ($"if (tolower(svg->value[{level-chain.Length}]) == \'{chain[0]}\') {{//up");
+					else
+						tw.WriteLine ($"if (!strncasecmp (&svg->value[{level-chain.Length}],\"{chain.ToString()}\",{chain.Length})) {{//up");
+					tw.Indent++;
+					chain.Clear();
+					chainTest = true;
+				}
+				tw.WriteLine ($"switch(tolower(svg->value[{level}])) {{");
+				foreach (IGrouping<char, string> elt in elts) {
+					tw.WriteLine ($"case '{char.ToLower(elt.Key)}':");
+					if (elt.Count() == 1) {
+						tw.Indent++;
+						process_enum_match (tw, adi, elt.First());
+						tw.WriteLine ($"break;");
+						tw.Indent--;
+						continue;
+					}
+					string ed = elt.FirstOrDefault (e=>e.Length == level + 1);
+					if (ed != null) {
+						tw.Indent++;
+						tw.WriteLine ($"if (nameLenght == {level + 1})");
+						tw.Indent++;
+						process_enum_match (tw, adi, ed);
+						tw.Indent--;
+						tw.WriteLine (@"else {");
+						tw.Indent++;
+						process_enums (adi, level+1, tw, elt.Where(el => el != ed). GroupBy (e=>e[level+1]), chain);
+						tw.Indent--;
+						tw.WriteLine (@"}");
+					} else {
+						tw.Indent++;
+						process_enums (adi, level+1, tw, elt.GroupBy (e=>e[level+1]), chain);
+					}
+					tw.WriteLine ($"break;");
+					tw.Indent--;
+				}
+				tw.WriteLine (@"default:");
+				tw.Indent++;
+				tw.WriteLine (defaultcase);
+				tw.WriteLine ($"break;");
+				tw.Indent--;
+				tw.WriteLine (@"}");
+				if (chainTest) {
+					tw.Indent--;
+					tw.WriteLine (@"} else");
+					tw.Indent++;
+					tw.WriteLine (defaultcase);
+					tw.Indent--;
+				}
+			} else {
+				IGrouping<char, string> elt = elts.First();
+				if (elt.Count() == 1) {
+					string c = elt.First();
+					tw.WriteLine ($"if (!strcasecmp (&svg->value[{level}],\"{c.Substring(level).ToLower()}\"))");
+					tw.Indent++;
+					process_enum_match (tw, adi, c);
+					tw.Indent--;
+					tw.WriteLine ($"else");
+					tw.Indent++;
+					tw.WriteLine (defaultcase);
+					tw.Indent--;
+					return;
+				}
+				chain.Append (char.ToLower(elt.Key));
+				string ed = elt.FirstOrDefault (e=>e.Length == level + 1);
+				if (ed != null) {
+					if (chain.Length == 1)
+						tw.WriteLine ($"if (tolower(svg->value[{level-chain.Length+1}]) == \'{chain[0]}\') {{//down");
+					else
+						tw.WriteLine ($"if (!strncasecmp (&svg->value[{level-chain.Length+1}],\"{chain.ToString()}\",{chain.Length})) {{//down");
+					tw.Indent++;
+					tw.WriteLine ($"if (nameLenght == {level + 1})");
+					tw.Indent++;
+					process_enum_match (tw, adi, ed);
+					tw.Indent--;
+					chain.Clear();
+					tw.WriteLine (@"else {");
+					tw.Indent++;
+					process_enums (adi, level+1, tw, elt.Where(el => el != ed). GroupBy (e=>e[level+1]), chain);
+					tw.Indent--;
+					tw.WriteLine (@"}");
+					tw.Indent--;
+					tw.WriteLine (@"} else");
+					tw.Indent++;
+					tw.WriteLine (defaultcase);
+					tw.Indent--;
+				} else
+					process_enums (adi, level+1, tw, elt.GroupBy (e=>e[level+1]), chain);
+			}
+		}
+		static void process_attributes_match_enum (IndentedTextWriter tw, AttributeDefInfo adi, AttributeTypeDeclEnumerated atde) {
+			IEnumerable<string> values = atde.tokenList.Select (tl=>tl.ToString());
+			tw.WriteLine (@"{");
+			tw.Indent++;
+			tw.WriteLine (@"nameLenght = strlen (svg->value);");
+			process_enums (adi, 0, tw, values.OrderBy (c=>c).GroupBy (e=>e[0]), new StringBuilder());
+			tw.Indent--;
+			tw.WriteLine (@"}");
+		}
+		static void process_attributes_match (IndentedTextWriter tw, AttributeDefInfo adi) {
+			DefaultDecl defDecl = adi.attDef.defaultDecl.Extract<DefaultDecl>();
+			if (adi.attDef.attributeTypeDecl is PEReference pe) {
+				var tmp = pe.CompiledValue;
+				if (tmp is AttributeTypeDeclEnumerated atde)
+					process_attributes_match_enum (tw, adi, atde);
+				else
+					tw.WriteLine ($"PROCESS_{adi.define}");
+			} else if (adi.attDef.attributeTypeDecl is AttributeTypeDeclEnumerated atde)
+				process_attributes_match_enum (tw, adi, atde);
+			else
+				tw.WriteLine ($"PROCESS_{adi.define}");
+		}
+
 		static void process_attributes (int level, IndentedTextWriter tw, IEnumerable<IGrouping<char, AttributeDefInfo>> elts, StringBuilder chain) {
 			const string defaultcase = @"LOG(""Unexpected attribute: %s->%s\n"", svg->att, svg->att);";
 			if (elts.Count() > 1) {
@@ -100,7 +218,7 @@ namespace svgparsergen
 					tw.WriteLine ($"case '{char.ToLower(elt.Key)}':");
 					if (elt.Count() == 1) {
 						tw.Indent++;
-						tw.WriteLine ($"PROCESS_{elt.First().define}");
+						process_attributes_match (tw, elt.First());
 						tw.WriteLine ($"break;");
 						tw.Indent--;
 						continue;
@@ -110,7 +228,7 @@ namespace svgparsergen
 						tw.Indent++;
 						tw.WriteLine ($"if (nameLenght == {level + 1})");
 						tw.Indent++;
-						tw.WriteLine ($"PROCESS_{ed.define}");
+						process_attributes_match (tw, ed);
 						tw.Indent--;
 						tw.WriteLine (@"else {");
 						tw.Indent++;
@@ -143,7 +261,7 @@ namespace svgparsergen
 					AttributeDefInfo c = elt.First();
 					tw.WriteLine ($"if (!strcasecmp (&svg->att[{level}],\"{c.name.Substring(level).ToLower()}\"))");
 					tw.Indent++;
-					tw.WriteLine ($"PROCESS_{c.define}");
+					process_attributes_match (tw, c);
 					tw.Indent--;
 					tw.WriteLine ($"else");
 					tw.Indent++;
@@ -161,7 +279,7 @@ namespace svgparsergen
 					tw.Indent++;
 					tw.WriteLine ($"if (nameLenght == {level + 1})");
 					tw.Indent++;
-					tw.WriteLine ($"PROCESS_{ed.define}");
+					process_attributes_match (tw, ed);
 					tw.Indent--;
 					chain.Clear();
 					tw.WriteLine (@"else {");
@@ -180,7 +298,7 @@ namespace svgparsergen
 		}
 
 		static void process_elements (int level, IndentedTextWriter tw, IEnumerable<IGrouping<char, string>> elts, StringBuilder chain) {
-			const string commonSig = "svg, f, hasStroke, hasFill, stroke, fill";
+			const string defaultcase = @"skip_element";
 			if (elts.Count() > 1) {
 				bool chainTest = false;
 				if (chain.Length > 0) {
@@ -197,7 +315,7 @@ namespace svgparsergen
 					tw.WriteLine ($"case '{char.ToLower(elt.Key)}':");
 					if (elt.Count() == 1) {
 						tw.Indent++;
-						tw.WriteLine ($"res = read_{elt.First()}_attributes ({commonSig});");
+						tw.WriteLine ($"res = read_{elt.First()}_attributes ({commonSigCall});");
 						tw.WriteLine ($"break;");
 						tw.Indent--;
 						continue;
@@ -207,7 +325,7 @@ namespace svgparsergen
 						tw.Indent++;
 						tw.WriteLine ($"if (nameLenght == {level + 1})");
 						tw.Indent++;
-						tw.WriteLine ($"res = read_{ed}_attributes ({commonSig});");
+						tw.WriteLine ($"res = read_{ed}_attributes ({commonSigCall});");
 						tw.Indent--;
 						tw.WriteLine (@"else {");
 						tw.Indent++;
@@ -223,7 +341,7 @@ namespace svgparsergen
 				}
 				tw.WriteLine (@"default:");
 				tw.Indent++;
-				tw.WriteLine (@"skip_element");
+				tw.WriteLine (defaultcase);
 				tw.WriteLine ($"break;");
 				tw.Indent--;
 				tw.WriteLine (@"}");
@@ -231,7 +349,7 @@ namespace svgparsergen
 					tw.Indent--;
 					tw.WriteLine (@"} else");
 					tw.Indent++;
-					tw.WriteLine (@"skip_element");
+					tw.WriteLine (defaultcase);
 					tw.Indent--;
 				}
 			} else {
@@ -240,11 +358,11 @@ namespace svgparsergen
 					string c = elt.First();
 					tw.WriteLine ($"if (!strcasecmp (&svg->elt[{level}],\"{c.Substring(level).ToLower()}\"))");
 					tw.Indent++;
-					tw.WriteLine ($"res = read_{c}_attributes ({commonSig});");
+					tw.WriteLine ($"res = read_{c}_attributes ({commonSigCall});");
 					tw.Indent--;
 					tw.WriteLine ($"else");
 					tw.Indent++;
-					tw.WriteLine ($"skip_element");
+					tw.WriteLine (defaultcase);
 					tw.Indent--;
 					return;
 				}
@@ -258,7 +376,7 @@ namespace svgparsergen
 					tw.Indent++;
 					tw.WriteLine ($"if (nameLenght == {level + 1})");
 					tw.Indent++;
-					tw.WriteLine ($"res = read_{ed}_attributes ({commonSig});");
+					tw.WriteLine ($"res = read_{ed}_attributes ({commonSigCall});");
 					tw.Indent--;
 					chain.Clear();
 					tw.WriteLine (@"else {");
@@ -269,7 +387,7 @@ namespace svgparsergen
 					tw.Indent--;
 					tw.WriteLine (@"} else");
 					tw.Indent++;
-					tw.WriteLine ($"skip_element");
+					tw.WriteLine (defaultcase);
 					tw.Indent--;
 				} else
 					process_elements (level+1, tw, elt.GroupBy (e=>e[level+1]), chain);
@@ -278,6 +396,22 @@ namespace svgparsergen
 		static string normalize (string str) => str.Replace ('-', '_');
 		static string normalize_def (string str) => str.Replace ('-', '_').ToUpper();
 		const string source_name = @"parser_gen";
+		const string commonSig = "svg_context* svg, FILE* f, svg_paint_type hasStroke, svg_paint_type hasFill, uint32_t stroke, uint32_t fill, void* parentData";
+		const string commonSigCall = "svg, f, hasStroke, hasFill, stroke, fill, parentData";
+
+
+		static void write_process_attrib_macro (IndentedTextWriter tw, string define) {
+			const string defaultattribdef = @"LOG(""Unprocessed attribute: %s->%s\n"", svg->elt, svg->att);";
+
+			tw.WriteLine ($"#ifndef PROCESS_{define}");
+			tw.Indent++;
+			tw.WriteLine ($"#define PROCESS_{define} {defaultattribdef}");
+			tw.Indent--;
+			tw.WriteLine ($"#endif");
+		}
+		static void write_process_attrib_macro2 (IndentedTextWriter tw, string define) {
+			tw.WriteLine ($"#define PROCESS_{define} ");
+		}
 		static void Main(string[] args)
 		{
 			string test = System.IO.Directory.GetCurrentDirectory();
@@ -308,8 +442,6 @@ namespace svgparsergen
 				parenting.Add (e.Name.ToString(), childs);
 			}
 
-			const string commonSig = "svg_context* svg, FILE* f, svg_paint_type hasStroke, svg_paint_type hasFill, uint32_t stroke, uint32_t fill";
-			const string commonSigCall = "svg, f, hasStroke, hasFill, stroke, fill";
 
 			//string[] skip_funcs = {"rect","cirlce","svg","line","polygon","polyline","g","defs","stop","cirlce","path"};
 			using (Stream stream = new FileStream ($"/mnt/devel/tests/svgParser/src/{source_name}.h", FileMode.Create)) {
@@ -319,15 +451,67 @@ namespace svgparsergen
 						tw.WriteLine ($"#define {source_name.ToUpper()}_H");
 						tw.WriteLine ("#include \"vkvg_svg_internal.h\"\n");
 
-						const string defaultattribdef = @"LOG(""Unprocessed attribute: %s->%s\n"", svg->elt, svg->att);";
-
-						foreach (string define in attributes.Values.SelectMany (al=>al).Select (a=>a.define).Distinct()) {
-							tw.WriteLine ($"#ifndef PROCESS_{define}");
+						foreach (string group in attributes.Values.SelectMany (al=>al).Select (a=>a.attGroup_normalized).Distinct().Where(s=>s.EndsWith("ATTRIB"))) {
+							tw.WriteLine ($"#ifndef HEADING_{group}");
 							tw.Indent++;
-							tw.WriteLine ($"#define PROCESS_{define} {{{defaultattribdef}}}");
+							tw.WriteLine ($"#define HEADING_{group}");
+							tw.Indent--;
+							tw.WriteLine ($"#endif");
+							tw.WriteLine ($"#ifndef PROCESS_{group}");
+							tw.Indent++;
+							tw.WriteLine ($"#define PROCESS_{group}");
 							tw.Indent--;
 							tw.WriteLine ($"#endif");
 						}
+
+						foreach (AttributeDefInfo adi in attributes.Values.SelectMany (al=>al).Distinct()) {
+							DefaultDecl defDecl = adi.attDef.defaultDecl.Extract<DefaultDecl>();
+							if (adi.attDef.attributeTypeDecl is PEReference pe) {
+								var tmp = pe.CompiledValue;
+								if (tmp is AttributeTypeDeclEnumerated atde) {
+									foreach (string value in atde.tokenList.Select (tl=>tl.ToString()))
+										write_process_attrib_macro (tw, $"{adi.define}_{value.ToUpper().Replace('-','_')}");
+								} else
+									write_process_attrib_macro (tw, adi.define);
+							} else if (adi.attDef.attributeTypeDecl is AttributeTypeDeclEnumerated atde) {
+								foreach (string value in atde.tokenList.Select (tl=>tl.ToString()))
+									write_process_attrib_macro (tw, $"{adi.define}_{value.ToUpper().Replace('-','_')}");
+							} else
+								write_process_attrib_macro (tw, adi.define);
+						}
+						/*using (Stream stream2 = new FileStream ($"tmp.txt", FileMode.Create)) {
+							using (StreamWriter sw2 = new StreamWriter(stream2)) {
+								using (IndentedTextWriter tw2 = new IndentedTextWriter (sw2, "\t")) {
+
+									foreach (AttributeDefInfo adi in attributes.Values.SelectMany (al=>al).Distinct()) {
+										DefaultDecl defDecl = adi.attDef.defaultDecl.Extract<DefaultDecl>();
+										if (adi.attDef.attributeTypeDecl is PEReference pe) {
+											var tmp = pe.CompiledValue;
+											if (tmp is AttributeTypeDeclEnumerated atde) {
+												foreach (string value in atde.tokenList.Select (tl=>tl.ToString()))
+													write_process_attrib_macro2 (tw2, $"{adi.define}_{value.ToUpper().Replace('-','_')}");
+											} else
+												write_process_attrib_macro2 (tw2, adi.define);
+										} else if (adi.attDef.attributeTypeDecl is AttributeTypeDeclEnumerated atde) {
+											foreach (string value in atde.tokenList.Select (tl=>tl.ToString()))
+												write_process_attrib_macro2 (tw2, $"{adi.define}_{value.ToUpper().Replace('-','_')}");
+										} else
+											write_process_attrib_macro2 (tw2, adi.define);
+									}
+								}
+							}
+						}*/
+						/*using (Stream stream2 = new FileStream ($"processgroups.txt", FileMode.Create)) {
+							using (StreamWriter sw2 = new StreamWriter(stream2)) {
+								using (IndentedTextWriter tw2 = new IndentedTextWriter (sw2, "\t")) {
+
+									foreach (string group in attributes.Values.SelectMany (al=>al).Select (a=>a.attGroup_normalized).Distinct().Where(s=>s.EndsWith("ATTRIB"))) {
+										tw2.WriteLine ($"#define PROCESS_{group}");
+									}
+								}
+							}
+						}*/
+
 						foreach (string elt in attributes.Keys) {
 							string elt_norm = normalize_def(elt);
 							tw.WriteLine ($"#ifndef HEADING_{elt_norm}");
@@ -357,19 +541,78 @@ namespace svgparsergen
 							tw.WriteLine ($"int read_{elt_norm}_attributes ({commonSig});");
 						}
 
-						
+						tw.WriteLine (@"#endif");
+						tw.WriteLine ($"#ifdef {source_name.ToUpper()}_IMPLEMENTATION");
+						foreach (string elt in attributes.Keys) {
+							/*if (skip_funcs.Contains(elt))
+								continue;*/
+							string elt_norm = normalize(elt);
+							string elt_def = normalize_def(elt);
+							List<AttributeDefInfo> adi = attributes[elt];
+							tw.WriteLine ($"int read_{elt_norm}_attributes ({commonSig}) {{");
+							tw.Indent++;
+							tw.WriteLine ($"HEADING_{elt_def}");
+							foreach (string group in adi.Select (a=>a.attGroup_normalized).Distinct().Where(s=>s.EndsWith("ATTRIB"))) {
+								tw.WriteLine ($"HEADING_{group}");
+							}
+							tw.WriteLine (@"read_attributes_loop_start");
+							tw.Indent++;
+							tw.WriteLine (@"int nameLenght = strlen (svg->att);");
+							process_attributes (0, tw, adi.OrderBy (c=>c.name).GroupBy (e=>e.name[0]), new StringBuilder());
+							tw.Indent--;
+							tw.WriteLine (@"read_attributes_loop_end");
+							foreach (string group in adi.Select (a=>a.attGroup_normalized).Distinct().Where(s=>s.EndsWith("ATTRIB"))) {
+								tw.WriteLine ($"PROCESS_{group}");
+							}
+							tw.WriteLine ($"ELEMENT_PRE_PROCESS_{elt_def}");
+							tw.WriteLine (@"read_tag_end");
+							tw.WriteLine (@"if (res > 0)");
+							tw.Indent++;
+							if (parenting.ContainsKey (elt) && parenting[elt].Count > 0)
+								tw.WriteLine ($"res = read_{elt_norm}_children ({commonSigCall});");
+							else
+								tw.WriteLine ($"res = skip_children ({commonSigCall});");
+							tw.Indent--;
+							tw.WriteLine ($"ELEMENT_POST_PROCESS_{elt_def}");
+							tw.WriteLine (@"return res;");
+							tw.Indent--;
+							tw.WriteLine (@"}");
+						}
+						tw.WriteLine ("\n");
+
+						foreach (KeyValuePair<string, List<string>> kvp in parenting) {
+							if (kvp.Value.Count == 0)
+								continue;
+							tw.WriteLine ($"int read_{normalize (kvp.Key)}_children ({commonSig}) {{");
+							tw.Indent++;
+
+							tw.WriteLine (@"int res = 0;");
+
+							tw.WriteLine (@"while (!feof (f)) {");
+							tw.Indent++;
+
+							tw.WriteLine (@"read_element_start");
+
+							tw.WriteLine (@"int nameLenght = strlen (svg->elt);");
+
+							process_elements (0,tw, kvp.Value.OrderBy (c=>c).GroupBy (e=>e[0]), new StringBuilder());
+
+							tw.Indent--;
+							tw.WriteLine (@"}");
+							tw.WriteLine (@"return res;");
+							tw.Indent--;
+							tw.WriteLine (@"}");
+						}
 						tw.WriteLine (@"#endif");
 					}
 				}
 			}
-			using (Stream stream = new FileStream ($"/mnt/devel/tests/svgParser/src/{source_name}.c", FileMode.Create)) {
+			/*using (Stream stream = new FileStream ($"/mnt/devel/tests/svgParser/src/{source_name}.c", FileMode.Create)) {
 				using (StreamWriter sw = new StreamWriter(stream)) {
 					using (IndentedTextWriter tw = new IndentedTextWriter (sw, "\t")) {
 						tw.WriteLine ($"#include \"{source_name}.h\"\n");
 
 						foreach (string elt in attributes.Keys) {
-							/*if (skip_funcs.Contains(elt))
-								continue;*/
 							string elt_norm = normalize(elt);
 							string elt_def = normalize_def(elt);
 							List<AttributeDefInfo> adi = attributes[elt];
@@ -417,7 +660,7 @@ namespace svgparsergen
 						}
 					}
 				}
-			}
+			}*/
 		}
 	}
 }
