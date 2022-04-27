@@ -487,7 +487,7 @@ namespace svgparsergen
 							} else
 								write_process_attrib_macro (tw, adi.define);
 						}
-						/*using (Stream stream2 = new FileStream ($"tmp.txt", FileMode.Create)) {
+						using (Stream stream2 = new FileStream ($"tmp.txt", FileMode.Create)) {
 							using (StreamWriter sw2 = new StreamWriter(stream2)) {
 								using (IndentedTextWriter tw2 = new IndentedTextWriter (sw2, "\t")) {
 
@@ -508,8 +508,8 @@ namespace svgparsergen
 									}
 								}
 							}
-						}*/
-						/*using (Stream stream2 = new FileStream ($"processgroups.txt", FileMode.Create)) {
+						}
+						using (Stream stream2 = new FileStream ($"processgroups.txt", FileMode.Create)) {
 							using (StreamWriter sw2 = new StreamWriter(stream2)) {
 								using (IndentedTextWriter tw2 = new IndentedTextWriter (sw2, "\t")) {
 
@@ -518,7 +518,7 @@ namespace svgparsergen
 									}
 								}
 							}
-						}*/
+						}
 
 						foreach (string elt in attributes.Keys) {
 							string elt_norm = normalize_def(elt);
